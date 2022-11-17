@@ -1,5 +1,7 @@
 import requests
 import json
+from bs4 import BeautifulSoup
+import re
 
 
 class Consumer:
@@ -209,9 +211,50 @@ class Consumer:
 
         return buddiesObj
 
+    def getAllSkinsPrice(self):
+        page = requests.get('https://valorant.fandom.com/wiki/Weapon_Skins')
+        soup = BeautifulSoup(page.content, 'html.parser')
+        tables = soup.find_all('table', class_='wikitable')
+
+        skinsPriceObj = []
+
+        for i in range(len(tables)):
+            if (i == 1 or i == 4):
+                for row in tables[i].find_all('tr'):
+                    cells = row.find_all('td')
+
+                    if (len(cells) > 0):
+                        price = cells[4].text.strip() if i == 1 else cells[3].text.strip()
+                        price = price.replace('2021', '').replace('2022', '')
+                        price = re.sub('[^0-9]', '', price)
+
+                        weapon = cells[3].find('a')['title'] if i == 1 else cells[2].find('a')['title']
+                        weapon = 'Melee' if weapon == 'Tactical Knife' else weapon
+
+                        skinPriceObj = {
+                            'displayName': cells[2].text.strip(),
+                            'price': price,
+                            'weapon': weapon,
+                        }
+
+                        skinsPriceObj.append(skinPriceObj)
+
+        return skinsPriceObj
+
 
 if __name__ == '__main__':
     consumer = Consumer()
 
-    with open('result.json', 'w') as outfile:
-        json.dump(consumer.getAllSprays(), outfile, indent=4)
+    info = {
+        'weaponsAndSkins': consumer.getAllWeaponsAndSkins(),
+        'bundles': consumer.getAllBundles(),
+        'sprays': consumer.getAllSprays(),
+        'titles': consumer.getAllTitles(),
+        'playerCards': consumer.getAllPlayerCards(),
+        'buddies': consumer.getAllBuddies(),
+        'skinsPrice': consumer.getAllSkinsPrice(),
+    }
+
+    for key, value in info.items():
+        with open(f'{key}.json', 'w') as f:
+            json.dump(value, f, indent=4)
