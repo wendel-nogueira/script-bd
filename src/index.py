@@ -483,23 +483,22 @@ def saveData(database, databaseTables, schema, info):
                         })
 
     for price in info['skinsPrice']:
-        cursor = database.execute_sql('select ps.id, ps.name from {} ps join {} pb on ps.id_bundle = pb.id where pb."name" like %(weaponname)s and ps.theme like %(theme)s'.format(
+        cursor = database.execute_sql('select ps.id, ps.name from {} ps join {} pb on ps.id_bundle = pb.id join {} pw on ps.id_weapon = pw.id where pw.name like %(weaponname)s and ps.theme like %(theme)s'.format(
             schema + '.' + databaseTables['skins'],
-            schema + '.' + databaseTables['bundles']
+            schema + '.' + databaseTables['bundles'],
+            schema + '.' + databaseTables['weapons']
         ), {
             'weaponname': '%' + price['weapon'] + '%',
             'theme': '%' + price['displayName'] + '%'
         })
 
-        print("select ps.id, ps.name from " + schema + '.' + databaseTables['skins'] + " ps join " + schema + '.' + databaseTables['bundles'] + " pb on ps.id_bundle = pb.id where pb.name like '%" + price['weapon'] + "%' and ps.theme like '%'" + price['displayName'] + "'%'")
-
         if (cursor.rowcount > 0):
-            print(cursor.fetchall()[0][0], price['price'], cursor.rowcount)
+            idSkin = cursor.fetchall()[0][0]
             database.execute_sql('update {} set price = %(price)s where id = %(id)s'.format(
                 schema + '.' + databaseTables['skins']
             ), {
-                'id': cursor.fetchall()[0][0],
-                'price': price['price']
+                'id': idSkin,
+                'price': float(price['price'])
             })
 
     for spray in info['sprays']:
@@ -646,8 +645,7 @@ if __name__ == '__main__':
     print('Dados salvos com sucesso!')
 
     print('Finalizando o script...')
-    '''
+
     for key, value in info.items():
         with open(f'{key}.json', 'w') as f:
             json.dump(value, f, indent=4)
-    '''
