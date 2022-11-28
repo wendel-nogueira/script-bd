@@ -2,6 +2,18 @@
 
 Este é um script criado com o objetivo de extrair, tratar e armazenar dados presentes em ``https://valorant-api.com/v1/`` e ``https://valorant.fandom.com/wiki/Weapon_Skins``.
 
+# Aplicação complementar
+
+É responsável por consumir os dados gerados a partir deste script, por meio da utilização de filtros contidos na aplicação.
+
+## Front-end 
+
+https://github.com/lavyoliveira/banco-de-dados/
+
+## Back-end 
+
+https://github.com/wendel-nogueira/back-end/tree/dev
+
 ### Tecnologias utilizadas:
 
 - [python](https://www.python.org)
